@@ -8,7 +8,14 @@ chrome.extension.sendMessage({}, function (response) {
 			let studentsNames = [
 				'você',
 				'maicon moreira',
-				'dominick brasileiro'
+				'dominick brasileiro',
+				'natalia narloch',
+				'carolina teixeira',
+				'thuany de souza',
+				'victor jaraceski',
+				'edna thayna',
+				'tainara rocha',
+				'josé pedro'
 			]
 			studentsNames = studentsNames.map(name => name.toLowerCase()) // so pra garantir
 			const totalStudents = studentsNames.length
