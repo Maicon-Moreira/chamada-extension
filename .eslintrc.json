@@ -14,5 +14,8 @@
         "ecmaVersion": 11
     },
     "rules": {
+        "indent": ["error", 4],
+        "max-len": "off",
+        "no-undef": "off"
     }
 }
