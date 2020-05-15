@@ -1,6 +1,6 @@
 # Chamada Meet Bonja
 
-[![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://travis-ci.org/joemccann/dillinger)
+[![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)]
 
 Chamada Meet Bonja é uma extensão para Chrome ou navegadores baseados em Chromium criada com o intuito de facilitar a chamada online dos professores do colégio Bonja na plataforma Google Meet.
 
@@ -8,7 +8,7 @@ Chamada Meet Bonja é uma extensão para Chrome ou navegadores baseados em Chrom
   - Use
   - E veja o resultado
 
-### Installation
+### Instalação
 
 Chamada Meet Bonja requer navegadores [Chrome](https://www.google.com/intl/pt-BR/chrome/) ou baseados em [Chromium](https://pt.wikipedia.org/wiki/Chromium).
 
