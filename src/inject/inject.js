@@ -4,18 +4,17 @@ const readyStateCheckInterval = setInterval(() => {
     clearInterval(readyStateCheckInterval);
 
     let studentsNames = [
-      'você',
-      'maicon moreira',
-      'dominick brasileiro',
-      'natalia narloch',
-      'carolina teixeira',
-      'thuany de souza',
-      'victor jaraceski',
-      'edna thayna',
-      'tainara rocha',
-      'josé pedro',
+      ['maicon moreira', 'C'],
+      ['dominick brasileiro', 'A'],
+      ['natalia narloch', 'C'],
+      ['carolina teixeira', 'C'],
+      ['thuany de souza', 'A'],
+      ['victor jaraceski', 'A'],
+      ['edna thayna', 'A'],
+      ['tainara rocha', 'A'],
+      ['josé pedro', 'C'],
     ];
-    studentsNames = studentsNames.map((name) => name.toLowerCase()); // so pra garantir
+    studentsNames = studentsNames.map(([name, group]) => [name.toLowerCase(), group]);
     const totalStudents = studentsNames.length;
 
     const calledNames = [];
@@ -23,7 +22,7 @@ const readyStateCheckInterval = setInterval(() => {
     let mainPage = false;
     let buttonInjected = false;
     let buttonText = 'Clique para iniciar chamada';
-    let inCall = false;
+    let inCalling = false;
 
     const button = document.createElement('div');
     const span = document.createElement('span');
@@ -35,10 +34,10 @@ const readyStateCheckInterval = setInterval(() => {
       }
 
       if (mainPage) {
-        const isChatOpen = !!document.querySelectorAll('.z38b6.CnDs7d.hPqowe')[0];
+        const isChatOpen = !!document.querySelector('.z38b6.CnDs7d.hPqowe');
 
         if (isChatOpen) {
-          const fullTopBar = document.getElementsByClassName('Jrb8ue')[0];
+          const fullTopBar = document.querySelector('.Jrb8ue');
           const fullTopBarPositions = fullTopBar.getBoundingClientRect();
           const chatPositions = document.querySelector('.mKBhCf.qwU8Me.RlceJe.kjZr4')
             .getBoundingClientRect();
@@ -66,25 +65,23 @@ const readyStateCheckInterval = setInterval(() => {
           span.id = 'callSpan';
 
           button.onclick = () => {
-            if (!inCall) {
-              inCall = true;
-            } else if (inCall) {
-              inCall = false;
+            inCalling = !inCalling;
 
+            if (!inCalling) {
               const newTab = window.open();
 
               const presents = calledNames;
-              const notPresents = studentsNames.filter((name) => !presents.includes(name));
+              const notPresents = studentsNames.filter((name) => !presents.includes(name[0]));
 
-              const string = [];
+              const content = [];
 
-              string.push('NÃO PRESENTES:<br>');
-              notPresents.forEach((name) => string.push(name.toUpperCase()));
+              content.push('NÃO PRESENTES:<br>');
+              notPresents.forEach((name) => content.push(name[0].toUpperCase()));
 
-              string.push('<br>PRESENTES:<br>');
-              presents.forEach((name) => string.push(name.toUpperCase()));
+              content.push('<br>PRESENTES:<br>');
+              presents.forEach((name) => content.push(name[0].toUpperCase()));
 
-              newTab.document.write(string.join('<br>'));
+              newTab.document.write(content.join('<br>'));
             }
           };
 
@@ -94,9 +91,9 @@ const readyStateCheckInterval = setInterval(() => {
           buttonInjected = true;
         }
         if (buttonInjected) {
-          if (inCall) {
+          if (inCalling) {
             if (!isChatOpen) {
-              buttonText = "<span style='color:red'>IMPOSSÍVEL REALIZAR CHAMADA COM O CHAT FECHADO !";
+              buttonText = "<span style='color:red'>Por favor, abra o chat!</span>";
             }
             if (isChatOpen) {
               buttonText = `Realizando chamada (${calledNames.length} de ${totalStudents}). Clique para finalizar.`;
@@ -109,7 +106,6 @@ const readyStateCheckInterval = setInterval(() => {
                 if (text.match(/a|b|c/gm)) {
                   if (!calledNames.includes(name)) {
                     calledNames.push(name);
-                    console.log(name, 'chamado');
                   }
                 }
               });
