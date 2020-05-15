@@ -1,4 +1,16 @@
 function renderNotPresentStudents(students) {
+    students.sort((a, b) => {
+        if (a[1] > b[1]) {
+            return 1;
+        }
+
+        if (a[1] < b[1]) {
+            return -1;
+        }
+
+        return 0;
+    });
+
     return students.reduce((acc, [name, group]) => `
         ${acc}
         <div class="student">
@@ -20,11 +32,11 @@ function renderPresentStudents(students, studentNames) {
         if (typeof a !== 'object') return 1;
         if (typeof b !== 'object') return -1;
 
-        if (a[0] > b[0]) {
+        if (a[1] > b[1]) {
             return 1;
         }
 
-        if (a[0] < b[0]) {
+        if (a[1] < b[1]) {
             return -1;
         }
 
