@@ -211,7 +211,7 @@ chrome.extension.sendMessage({}, () => {
                                     const name = message.children[0].children[0].innerText.toLowerCase();
                                     const text = message.children[1].innerText.toLowerCase();
 
-                                    if (text.match(/a|b|c/gm)) {
+                                    if (text.match(/a|b|c/gm) && text.length <= 2) {
                                         if (!calledNames.includes(name) && name !== 'você' && name !== 'you') {
                                             calledNames.push(name);
                                         }
