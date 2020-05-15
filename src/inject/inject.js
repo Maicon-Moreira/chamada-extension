@@ -25,7 +25,7 @@ chrome.extension.sendMessage({}, function (response) {
 			let mainPage = false
 			let buttonInjected = false
 			let buttonText = 'Clique para iniciar chamada'
-			let callIsH = false
+			let inCall = false
 
 			const button = document.createElement('div')
 			const span = document.createElement('span')
@@ -35,9 +35,12 @@ chrome.extension.sendMessage({}, function (response) {
 				if (!mainPage) {
 					if (document.getElementById('lcsclient'))
 						mainPage = true
+					// console.log('Pagina inicial')
 				}
 
 				if (mainPage) {
+					// console.log('Pagina principal')
+
 					const isChatOpen = !!document.querySelectorAll(".z38b6.CnDs7d.hPqowe")[0]
 
 					if (isChatOpen) {
@@ -68,9 +71,11 @@ chrome.extension.sendMessage({}, function (response) {
 						span.id = "callSpan"
 
 						button.onclick = () => {
-							callIsH = !callIsH
-							if (callIsH) {
-								callIsH = false
+							if (!inCall) {
+								inCall = true
+							}
+							else if (inCall) {
+								inCall = false
 
 								const newTab = window.open()
 
@@ -95,7 +100,7 @@ chrome.extension.sendMessage({}, function (response) {
 						buttonInjected = true
 					}
 					if (buttonInjected) {
-						if (callIsH) {
+						if (inCall) {
 							if (!isChatOpen) {
 								buttonText = "<span style='color:red'>IMPOSSÍVEL REALIZAR CHAMADA COM O CHAT FECHADO !"
 							}
@@ -108,7 +113,7 @@ chrome.extension.sendMessage({}, function (response) {
 									const text = message.children[1].innerText.toLowerCase()
 
 									if (text.match(/a|b|c/gm)) {
-										if (!calledNames.includes(name)) {
+										if (calledNames.indexOf(name) == -1) {
 											calledNames.push(name)
 											console.log(name, 'chamado')
 										}
