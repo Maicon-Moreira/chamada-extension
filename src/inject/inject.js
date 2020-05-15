@@ -1,127 +1,231 @@
-// chrome.extension.sendMessage({}, (response) => {
-const readyStateCheckInterval = setInterval(() => {
-	if (document.readyState === 'complete') {
-		clearInterval(readyStateCheckInterval);
+function renderNotPresentStudents(students) {
+    students.sort((a, b) => {
+        if (a[1] > b[1]) {
+            return 1;
+        }
 
-		let studentsNames = [
-			'você',
-			'maicon moreira',
-			'dominick brasileiro',
-			'natalia narloch',
-			'carolina teixeira',
-			'thuany de souza',
-			'victor jaraceski',
-			'edna thayna',
-			'tainara rocha',
-			'josé pedro',
-		];
-		studentsNames = studentsNames.map((name) => name.toLowerCase()); // so pra garantir
-		const totalStudents = studentsNames.length;
+        if (a[1] < b[1]) {
+            return -1;
+        }
 
-		const calledNames = [];
+        return 0;
+    });
 
-		let mainPage = false;
-		let buttonInjected = false;
-		let buttonText = 'Clique para iniciar chamada';
-		let inCall = false;
+    return students.reduce((acc, [name, group]) => `
+        ${acc}
+        <div class="student">
+            <div class="name">${name.toUpperCase()}</div>
+            <div class="group">${group ? `3${group}` : ''}</div>
+        </div>
+    `, '');
+}
 
-		const button = document.createElement('div');
-		const span = document.createElement('span');
-		button.style.cursor = 'pointer';
+function renderPresentStudents(students, studentNames) {
+    const studentsWithGroup = students.map(((student) => {
+        const studentWithGroup = studentNames.find(([name]) => name === student);
 
-		setInterval(() => {
-			if (!mainPage) {
-				if (document.getElementById('lcsclient')) mainPage = true;
-			}
+        if (studentWithGroup) return studentWithGroup;
+        return student;
+    }));
 
-			if (mainPage) {
-				const isChatOpen = !!document.querySelectorAll('.z38b6.CnDs7d.hPqowe')[0];
+    studentsWithGroup.sort((a, b) => {
+        if (typeof a !== 'object') return 1;
+        if (typeof b !== 'object') return -1;
 
-				if (isChatOpen) {
-					const fullTopBar = document.getElementsByClassName('Jrb8ue')[0];
-					const fullTopBarPositions = fullTopBar.getBoundingClientRect();
-					const chatPositions = document.querySelector('.mKBhCf.qwU8Me.RlceJe.kjZr4')
-						.getBoundingClientRect();
+        if (a[1] > b[1]) {
+            return 1;
+        }
 
-					const fullTopBarCorrectX = chatPositions.x - fullTopBarPositions.width;
+        if (a[1] < b[1]) {
+            return -1;
+        }
 
-					fullTopBar.children[0].classList.remove('eLNT1d');
-					fullTopBar.classList.add('float-right');
+        return 0;
+    });
 
-					fullTopBar.style.left = `${fullTopBarCorrectX}px`;
-				}
-				if (!isChatOpen) {
-					const fullTopBar = document.getElementsByClassName('Jrb8ue')[0];
+    return studentsWithGroup.reduce((acc, student) => {
+        const name = typeof student === 'object' ? student[0] : student;
+        const group = typeof student === 'object' ? student[1] : '';
 
-					fullTopBar.classList.remove('float-right');
-				}
+        return `
+        ${acc}
+        <div class="student">
+            <div class="name">${name.toUpperCase()}</div>
+            <div class="group">${group ? `3${group}` : ''}</div>
+        </div>
+    `;
+    }, '');
+}
 
-				if (!buttonInjected) {
-					const topBar = document.getElementsByClassName('NzPR9b')[0];
+chrome.extension.sendMessage({}, () => {
+    const readyStateCheckInterval = setInterval(() => {
+        if (document.readyState === 'complete') {
+            clearInterval(readyStateCheckInterval);
 
-					topBar.style.borderRadius = '8px';
 
-					span.innerText = buttonText;
-					button.id = 'callButton';
-					span.id = 'callSpan';
+            let studentsNames = [
+                ['maicon moreira', 'C'],
+                ['dominick brasileiro', 'A'],
+                ['natalia narloch', 'C'],
+                ['carolina teixeira', 'C'],
+                ['thuany de souza', 'A'],
+                ['victor jaraceski', 'A'],
+                ['edna thayna', 'B'],
+                ['tainara rocha', 'A'],
+                ['josé pedro', 'C'],
+            ];
 
-					button.onclick = () => {
-						if (!inCall) {
-							inCall = true;
-						} else if (inCall) {
-							inCall = false;
+            studentsNames = studentsNames.map(([name, group]) => [name.toLowerCase(), group]);
 
-							const newTab = window.open();
+            const totalStudents = studentsNames.length;
 
-							const presents = calledNames;
-							const notPresents = studentsNames.filter((name) => !presents.includes(name));
+            const calledNames = [];
 
-							const string = [];
+            let mainPage = false;
+            let buttonInjected = false;
+            let buttonText = 'Clique para iniciar chamada';
+            let inCalling = false;
 
-							string.push('NÃO PRESENTES:<br>');
-							notPresents.forEach((name) => string.push(name.toUpperCase()));
+            const button = document.createElement('div');
+            const span = document.createElement('span');
+            button.style.cursor = 'pointer';
 
-							string.push('<br>PRESENTES:<br>');
-							presents.forEach((name) => string.push(name.toUpperCase()));
+            setInterval(() => {
+                if (!mainPage) {
+                    if (document.getElementById('lcsclient')) mainPage = true;
+                }
 
-							newTab.document.write(string.join('<br>'));
-						}
-					};
+                if (mainPage) {
+                    const isChatOpen = !!document.querySelector('.z38b6.CnDs7d.hPqowe');
 
-					button.append(span);
-					topBar.prepend(button);
+                    if (isChatOpen) {
+                        const fullTopBar = document.querySelector('.Jrb8ue');
+                        const fullTopBarPositions = fullTopBar.getBoundingClientRect();
 
-					buttonInjected = true;
-				}
-				if (buttonInjected) {
-					if (inCall) {
-						if (!isChatOpen) {
-							buttonText = "<span style='color:red'>IMPOSSÍVEL REALIZAR CHAMADA COM O CHAT FECHADO !";
-						}
-						if (isChatOpen) {
-							buttonText = `Realizando chamada (${calledNames.length} de ${totalStudents}). Clique para finalizar.`;
+                        // property 'getBoundingClientRect' of null error fix
+                        const chat = document.querySelector('.mKBhCf.qwU8Me.RlceJe.kjZr4');
+                        if (chat) {
+                            const chatPositions = chat ? chat.getBoundingClientRect() : null;
 
-							const messages = document.querySelectorAll('.GDhqjd');
-							messages.forEach((message) => {
-								const name = message.children[0].children[0].innerText.toLowerCase();
-								const text = message.children[1].innerText.toLowerCase();
+                            const fullTopBarCorrectX = chatPositions.x - fullTopBarPositions.width;
 
-								if (text.match(/a|b|c/gm)) {
-									if (!calledNames.includes(name)) {
-										calledNames.push(name);
-										console.log(name, 'chamado');
-									}
-								}
-							});
-						}
-					} else {
-						buttonText = 'Clique para iniciar chamada';
-					}
+                            fullTopBar.children[0].classList.remove('eLNT1d');
+                            fullTopBar.classList.add('float-right');
 
-					span.innerHTML = buttonText;
-				}
-			}
-		});
-	}
-}, 10);
-// });
+                            fullTopBar.style.left = `${fullTopBarCorrectX}px`;
+                        }
+                    } else {
+                        const fullTopBar = document.getElementsByClassName('Jrb8ue')[0];
+
+                        fullTopBar.classList.remove('float-right');
+                    }
+
+                    if (!buttonInjected) {
+                        const topBar = document.getElementsByClassName('NzPR9b')[0];
+
+                        topBar.style.borderRadius = '8px';
+
+                        span.innerText = buttonText;
+                        button.id = 'callButton';
+                        span.id = 'callSpan';
+
+                        button.onclick = () => {
+                            inCalling = !inCalling;
+
+                            if (!inCalling) {
+                                const presents = calledNames;
+                                const notPresents = studentsNames.filter(([name]) => !presents.includes(name));
+
+                                presents.sort();
+                                notPresents.sort();
+
+                                const html = document.createElement('html');
+                                const head = document.createElement('head');
+
+                                const title = document.createElement('title');
+                                title.innerText = 'Chamada';
+
+                                const body = document.createElement('body');
+
+                                const content = `
+                                    <div class="presents">
+                                        <h2>Presentes:</h2>
+                                        ${renderPresentStudents(presents, studentsNames)}
+                                    </div>
+                                    <div class="not-presents">
+                                        <h2>Ausentes:</h2>
+                                        ${renderNotPresentStudents(notPresents)}
+                                    </div>
+                                `;
+
+                                const styles = document.createElement('style');
+
+                                styles.innerHTML = `
+                                    * {
+                                        font-family: sans-serif;
+                                    }
+                            
+                                    body {
+                                        display: flex;
+                                        justify-content: space-around;
+                                    }
+                            
+                                    .student {
+                                        margin: 12px 0;
+                                    }
+                            
+                                    .name, .group {
+                                        display: inline-block;
+                                    }                        
+                                `;
+
+                                body.innerHTML = content;
+                                head.appendChild(title);
+                                head.appendChild(styles);
+                                html.appendChild(head);
+                                html.appendChild(body);
+
+                                const tmp = document.createElement('div');
+                                tmp.appendChild(html);
+
+                                const newTab = window.open();
+                                newTab.document.write(tmp.innerHTML);
+                            }
+                        };
+
+                        button.append(span);
+                        topBar.prepend(button);
+
+                        buttonInjected = true;
+                    }
+                    if (buttonInjected) {
+                        if (inCalling) {
+                            if (!isChatOpen) {
+                                buttonText = "<span style='color:red'>Por favor, abra o chat!</span>";
+                            }
+                            if (isChatOpen) {
+                                buttonText = `Realizando chamada (${calledNames.length} de ${totalStudents}). Clique para finalizar.`;
+
+                                const messages = document.querySelectorAll('.GDhqjd');
+                                messages.forEach((message) => {
+                                    const name = message.children[0].children[0].innerText.toLowerCase();
+                                    const text = message.children[1].innerText.toLowerCase();
+
+                                    if (text.match(/a|b|c/gm)) {
+                                        if (!calledNames.includes(name) && name !== 'você' && name !== 'you') {
+                                            calledNames.push(name);
+                                        }
+                                    }
+                                });
+                            }
+                        } else {
+                            buttonText = 'Clique para iniciar chamada';
+                        }
+
+                        span.innerHTML = buttonText;
+                    }
+                }
+            });
+        }
+    }, 10);
+});
