@@ -1,134 +1,127 @@
-chrome.extension.sendMessage({}, function (response) {
-	var readyStateCheckInterval = setInterval(function () {
-		if (document.readyState === "complete") {
-			clearInterval(readyStateCheckInterval);
+// chrome.extension.sendMessage({}, (response) => {
+const readyStateCheckInterval = setInterval(() => {
+  if (document.readyState === 'complete') {
+    clearInterval(readyStateCheckInterval);
 
-			console.log("Extensão inicializada");
+    let studentsNames = [
+      'você',
+      'maicon moreira',
+      'dominick brasileiro',
+      'natalia narloch',
+      'carolina teixeira',
+      'thuany de souza',
+      'victor jaraceski',
+      'edna thayna',
+      'tainara rocha',
+      'josé pedro',
+    ];
+    studentsNames = studentsNames.map((name) => name.toLowerCase()); // so pra garantir
+    const totalStudents = studentsNames.length;
 
-			let studentsNames = [
-				'você',
-				'maicon moreira',
-				'dominick brasileiro',
-				'natalia narloch',
-				'carolina teixeira',
-				'thuany de souza',
-				'victor jaraceski',
-				'edna thayna',
-				'tainara rocha',
-				'josé pedro'
-			]
-			studentsNames = studentsNames.map(name => name.toLowerCase()) // so pra garantir
-			const totalStudents = studentsNames.length
+    const calledNames = [];
 
-			let calledNames = []
+    let mainPage = false;
+    let buttonInjected = false;
+    let buttonText = 'Clique para iniciar chamada';
+    let inCall = false;
 
-			let mainPage = false
-			let buttonInjected = false
-			let buttonText = 'Clique para iniciar chamada'
-			let inCall = false
+    const button = document.createElement('div');
+    const span = document.createElement('span');
+    button.style.cursor = 'pointer';
 
-			const button = document.createElement('div')
-			const span = document.createElement('span')
+    setInterval(() => {
+      if (!mainPage) {
+        if (document.getElementById('lcsclient')) mainPage = true;
+      }
 
-			let mainLoop = setInterval(() => {
+      if (mainPage) {
+        const isChatOpen = !!document.querySelectorAll('.z38b6.CnDs7d.hPqowe')[0];
 
-				if (!mainPage) {
-					if (document.getElementById('lcsclient'))
-						mainPage = true
-					// console.log('Pagina inicial')
-				}
+        if (isChatOpen) {
+          const fullTopBar = document.getElementsByClassName('Jrb8ue')[0];
+          const fullTopBarPositions = fullTopBar.getBoundingClientRect();
+          const chatPositions = document.querySelector('.mKBhCf.qwU8Me.RlceJe.kjZr4')
+            .getBoundingClientRect();
 
-				if (mainPage) {
-					// console.log('Pagina principal')
+          const fullTopBarCorrectX = chatPositions.x - fullTopBarPositions.width;
 
-					const isChatOpen = !!document.querySelectorAll(".z38b6.CnDs7d.hPqowe")[0]
+          fullTopBar.children[0].classList.remove('eLNT1d');
+          fullTopBar.classList.add('float-right');
 
-					if (isChatOpen) {
-						const fullTopBar = document.getElementsByClassName('Jrb8ue')[0]
-						const fullTopBarPositions = fullTopBar.getBoundingClientRect()
-						const chatPositions = document.querySelector('.mKBhCf.qwU8Me.RlceJe.kjZr4').getBoundingClientRect()
+          fullTopBar.style.left = `${fullTopBarCorrectX}px`;
+        }
+        if (!isChatOpen) {
+          const fullTopBar = document.getElementsByClassName('Jrb8ue')[0];
 
-						const fullTopBarCorrectX = chatPositions.x - fullTopBarPositions.width
+          fullTopBar.classList.remove('float-right');
+        }
 
-						fullTopBar.children[0].classList.remove('eLNT1d')
-						fullTopBar.classList.add('float-right')
+        if (!buttonInjected) {
+          const topBar = document.getElementsByClassName('NzPR9b')[0];
 
-						fullTopBar.style.left = fullTopBarCorrectX + 'px'
-					}
-					if (!isChatOpen) {
-						const fullTopBar = document.getElementsByClassName('Jrb8ue')[0]
+          topBar.style.borderRadius = '8px';
 
-						fullTopBar.classList.remove('float-right')
-					}
+          span.innerText = buttonText;
+          button.id = 'callButton';
+          span.id = 'callSpan';
 
-					if (!buttonInjected) {
-						const topBar = document.getElementsByClassName('NzPR9b')[0]
+          button.onclick = () => {
+            if (!inCall) {
+              inCall = true;
+            } else if (inCall) {
+              inCall = false;
 
-						topBar.style.borderRadius = '8px'
+              const newTab = window.open();
 
-						span.innerText = buttonText
-						button.id = "callButton"
-						span.id = "callSpan"
+              const presents = calledNames;
+              const notPresents = studentsNames.filter((name) => !presents.includes(name));
 
-						button.onclick = () => {
-							if (!inCall) {
-								inCall = true
-							}
-							else if (inCall) {
-								inCall = false
+              const string = [];
 
-								const newTab = window.open()
+              string.push('NÃO PRESENTES:<br>');
+              notPresents.forEach((name) => string.push(name.toUpperCase()));
 
-								const presents = calledNames
-								const notPresents = studentsNames.filter(name => presents.indexOf(name) == -1)
+              string.push('<br>PRESENTES:<br>');
+              presents.forEach((name) => string.push(name.toUpperCase()));
 
-								let string = ''
+              newTab.document.write(string.join('<br>'));
+            }
+          };
 
-								string += 'NÃO PRESENTES:<br><br>'
-								notPresents.forEach(name => string += `${name.toUpperCase()}<br>`)
+          button.append(span);
+          topBar.prepend(button);
 
-								string += '<br><br>PRESENTES:<br><br>'
-								presents.forEach(name => string += `${name.toUpperCase()}<br>`)
+          buttonInjected = true;
+        }
+        if (buttonInjected) {
+          if (inCall) {
+            if (!isChatOpen) {
+              buttonText = "<span style='color:red'>IMPOSSÍVEL REALIZAR CHAMADA COM O CHAT FECHADO !";
+            }
+            if (isChatOpen) {
+              buttonText = `Realizando chamada (${calledNames.length} de ${totalStudents}). Clique para finalizar.`;
 
-								newTab.document.write(string)
-							}
-						}
+              const messages = document.querySelectorAll('.GDhqjd');
+              messages.forEach((message) => {
+                const name = message.children[0].children[0].innerText.toLowerCase();
+                const text = message.children[1].innerText.toLowerCase();
 
-						button.append(span)
-						topBar.prepend(button)
+                if (text.match(/a|b|c/gm)) {
+                  if (!calledNames.includes(name)) {
+                    calledNames.push(name);
+                    console.log(name, 'chamado');
+                  }
+                }
+              });
+            }
+          } else {
+            buttonText = 'Clique para iniciar chamada';
+          }
 
-						buttonInjected = true
-					}
-					if (buttonInjected) {
-						if (inCall) {
-							if (!isChatOpen) {
-								buttonText = "<span style='color:red'>IMPOSSÍVEL REALIZAR CHAMADA COM O CHAT FECHADO !"
-							}
-							if (isChatOpen) {
-								buttonText = `Realizando chamada (${calledNames.length} de ${totalStudents}). Clique para finalizar.`
-
-								const messages = document.querySelectorAll('.GDhqjd')
-								messages.forEach(message => {
-									const name = message.children[0].children[0].innerText.toLowerCase()
-									const text = message.children[1].innerText.toLowerCase()
-
-									if (text.match(/a|b|c/gm)) {
-										if (calledNames.indexOf(name) == -1) {
-											calledNames.push(name)
-											console.log(name, 'chamado')
-										}
-									}
-								})
-							}
-						}
-						else {
-							buttonText = 'Clique para iniciar chamada'
-						}
-
-						span.innerHTML = buttonText
-					}
-				}
-			})
-		}
-	}, 10);
-});
+          span.innerHTML = buttonText;
+        }
+      }
+    });
+  }
+}, 10);
+// });
