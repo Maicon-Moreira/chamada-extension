@@ -1,0 +1,16 @@
+#callButton {
+    display: flex;
+    align-items: center;
+    align-content: center;
+}
+
+#callSpan {
+    text-align: center;
+    margin-left: 10px;
+}
+
+.float-right {
+    position: absolute !important;
+    /* left: 10px !important; */
+    border-radius: 8px;
+}

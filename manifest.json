@@ -1,0 +1,35 @@
+{
+  "name": "Extensão chamada Meet",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "description": "Extensão feita com intuito de facilitar chamada na plataforma online Meet do colégio Bonja.",
+  "homepage_url": "http://extensionizr.com",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "default_locale": "en",
+  "background": {
+    "page": "src/bg/background.html",
+    "persistent": true
+  },
+  "page_action": {
+    "default_icon": "icons/icon19.png",
+    "default_title": "page action demo",
+    "default_popup": "src/page_action/page_action.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://meet.google.com/*"
+      ],
+      "js": [
+        "src/inject/inject.js"
+      ],
+      "css": [
+        "css/index.css"
+      ]
+    }
+  ]
+}
